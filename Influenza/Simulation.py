@@ -152,9 +152,9 @@ class Simulation:
                - (self.parameters.recoveryRate + self.parameters.deathRateUL) \
                * IUL
         dRUL = self.parameters.recoveryRate * IUL
-        dSVL = - (1 - self.parameters.vaccineEfficacyVsInfection) \
+        dSVL = - (1 - self.parameters.relative_vaccineEfficacyVsInfection) \
                * Lambda * SVL
-        dEVL = (1 - self.parameters.vaccineEfficacyVsInfection) \
+        dEVL = (1 - self.parameters.relative_vaccineEfficacyVsInfection) \
                * Lambda * SVL \
                - self.parameters.latencyRate * EVL
         dIVL = self.parameters.latencyRate * EVL \
@@ -167,9 +167,9 @@ class Simulation:
                - (self.parameters.recoveryRate + self.parameters.deathRateUH) \
                * IUH
         dRUH = self.parameters.recoveryRate * IUH
-        dSVH = - (1 - self.parameters.vaccineEfficacyVsInfection) \
+        dSVH = - (1 - self.parameters.relative_vaccineEfficacyVsInfection) \
                * Lambda * SVH
-        dEVH = (1 - self.parameters.vaccineEfficacyVsInfection) \
+        dEVH = (1 - self.parameters.relative_vaccineEfficacyVsInfection) \
                * Lambda * SVH \
                - self.parameters.latencyRate * EVH
         dIVH = self.parameters.latencyRate * EVH \

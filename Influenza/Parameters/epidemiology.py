@@ -153,7 +153,7 @@ transmissibilityPW = PiecewiseAgeRate(
 
 ##vaccines not given to <6month old. For rest of age groups, relative vaccine efficacy is
 ## same
-vaccineEfficacyVsInfectionPW = PiecewiseAgeRate(
+relative_vaccineEfficacyVsInfectionPW = PiecewiseAgeRate(
     [0,1,1,1],
     [0,0.5, 16,65])
 

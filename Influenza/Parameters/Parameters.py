@@ -160,11 +160,11 @@ class Parameters:
               * numpy.outer(self.susceptibility * sUH0,
                             self.transmissibility) * self.contactMatrix
         FVL = self.transmissionScaling \
-              * numpy.outer((1 - self.vaccineEfficacyVsInfection)
+              * numpy.outer((1 - self.relative_vaccineEfficacyVsInfection)
                             * self.susceptibility * sVL0,
                             self.transmissibility) * self.contactMatrix
         FVH = self.transmissionScaling \
-              * numpy.outer((1 - self.vaccineEfficacyVsInfection)
+              * numpy.outer((1 - self.relative_vaccineEfficacyVsInfection)
                             * self.susceptibility * sVH0,
                             self.transmissibility) * self.contactMatrix
         
@@ -202,8 +202,8 @@ class Parameters:
         dumpData.latencyRate = self.latencyRatePW
         dumpData.susceptibility = self.susceptibilityPW
         dumpData.transmissibility = self.transmissibilityPW
-        dumpData.vaccineEfficacyVsInfection = \
-            self.vaccineEfficacyVsInfectionPW
+        dumpData.relative_vaccineEfficacyVsInfection = \
+            self.relative_vaccineEfficacyVsInfectionPW
         dumpData.vaccineEfficacyVsDeath = \
             self.vaccineEfficacyVsDeathPW
         dumpData.caseMortality = self.caseMortalityPW
