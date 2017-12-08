@@ -103,8 +103,8 @@ class Simulation:
         dIU = self.parameters.latencyRate * EU \
                - (self.parameters.recoveryRate + self.parameters.deathRateU) * IU
         dRU = self.parameters.recoveryRate * IU
-        dSV = - (1 - self.parameters.relative_vaccineEfficacyVsInfection) * Lambda * SV
-        dEV = (1 - self.parameters.relative_vaccineEfficacyVsInfection) \
+        dSV = - (1 - self.vaccineEfficacyVsInfection) * Lambda * SV
+        dEV = (1 - self.vaccineEfficacyVsInfection) \
                * Lambda * SV - self.parameters.latencyRate * EV
         dIV = self.parameters.latencyRate * EV \
                - (self.parameters.recoveryRate + self.parameters.deathRateV) * IV
@@ -221,7 +221,6 @@ class Simulation:
 	## extend to full ages groups. Proportions calculated by multiplying PVPWVal 
 	##values with the matrix defined in S.130
         self.parameters.proportionVaccinated = self.parameters.proportionVaccinatedPW.full(self.parameters.ages)
-	print ("self.hasSolution"), self.hasSolution
 	if self.hasSolution:
             IC = self.getLastValues()
             vacsUsed = (self.parameters.proportionVaccinated * IC[0]).sum()
@@ -229,14 +228,17 @@ class Simulation:
         else:
             vacsUsed = (self.parameters.proportionVaccinated
                         * self.parameters.population).sum() 
-	    print ("vacused"), vacsUsed
+	
 
         # Update initial condition for ODEs
         self.updateIC()
 
         return vacsUsed
         
-    def simulateWithVaccine(self, vacTimes, PVPWVals):
+    def simulateWithVaccine(self, vacTimes, PVPWVals, vacEfficacy):
+	
+	self.vaccineEfficacyVsInfection = vacEfficacy * self.parameters.relative_vaccineEfficacyVsInfection
+	
         nVacRounds = len(vacTimes)
 
         # Convert flat vector to 2-D array
@@ -290,7 +292,10 @@ class Simulation:
         print 'Infections:\t\t %g' % self.totalInfections
         print 'Deaths:\t\t\t %g' % self.totalDeaths
         print 'Hospitalizations:\t %g' % self.totalHospitalizations
-        print ('Age-specific infections:'), list(self.infections), sum(list(self.infections))
+        print ('Age-specific infections:'), list(self.infections)
+
+    def short_output(self):
+	return list(self.infections), list(self.hospitalizations)
 
     def getDumpData(self, runData = True):
         dumpData = fileIO.dumpContainer()
