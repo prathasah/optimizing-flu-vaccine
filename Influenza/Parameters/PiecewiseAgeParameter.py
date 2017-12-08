@@ -138,8 +138,7 @@ class PiecewiseAgeRate(PiecewiseAgeParameter):
         T /= numpy.outer(T.sum(1), numpy.ones(len(self.ages)))
 	
         assert numpy.all(abs(T.sum(1) - 1.) < 1e-12)
-
-        return T
+	return T
 
     def __repr__(self):
         return PiecewiseAgeParameter.__repr__(

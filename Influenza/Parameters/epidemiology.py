@@ -73,6 +73,12 @@ susceptibilityPW = PiecewiseAgeRate(
     [0, 5, 25, 50, 65])
 
 
+#normalized average of vaccination coverage 
+## across different age groups
+coverageRatePW = PiecewiseAgeRate(
+	[0.2625729893, 0.2016073335, 0.1210523011, 0.1689583726, 0.2458090036
+],[0,5,18,50,65])
+
 #: Placeholder value.  Set later by fixing R0.
 transmissibilityPW = PiecewiseAgeRate(
     [1.],
@@ -144,15 +150,12 @@ transmissibilityPW = PiecewiseAgeRate(
 #: | 90 (95% CI 83--94) (Children)                 |                        |
 #: +-----------------------------------------------+------------------------+
 #: 
+
+##vaccines not given to <6month old. For rest of age groups, relative vaccine efficacy is
+## same
 vaccineEfficacyVsInfectionPW = PiecewiseAgeRate(
-    [0,
-     numpy.random.triangular(0.4, 0.7, 1.),
-     numpy.random.triangular(0.5, 0.7, 0.9),
-     numpy.random.triangular(0.4, 0.5, 0.6)],
-    [0,
-     0.5,
-     16,
-     65])
+    [0,1,1,1],
+    [0,0.5, 16,65])
 
 
 #: 
@@ -197,6 +200,8 @@ vaccineEfficacyVsDeathPW = PiecewiseAgeRate(
 #: | 0.4701 (SE 0.0050) + 0.0614 (Ages 65+)        |                        |
 #: +-----------------------------------------------+------------------------+
 #:
+
+# not implemented
 proportionHighRiskPW = PiecewiseAgeRate(
     [numpy.random.normal(0.0415, 0.0044),
      numpy.random.normal(0.0883, 0.0051),
