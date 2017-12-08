@@ -19,7 +19,6 @@ class Simulation:
 
         # Initial condition
         self.Y0 = numpy.zeros(8 * self.parameters.ages.size)
-	print ("check Y0"), self.Y0, self.Y0.shape
 
         self.hasSolution = False
 
@@ -278,30 +277,20 @@ class Simulation:
         for (i, t) in enumerate(self.T):
             print '%g' % t,
             print '\t'.join(map(lambda f: ('%g' % f),
-                                (sum(self.EUL[i, :]),
-                                 sum(self.IUL[i, :]),
-                                 sum(self.RUL[i, :]),
-                                 sum(self.SVL[i, :]),
-                                 sum(self.EVL[i, :]),
-                                 sum(self.IVL[i, :]),
-                                 sum(self.RVL[i, :]),
-                                 sum(self.SUH[i, :]),
-                                 sum(self.EUH[i, :]),
-                                 sum(self.IUH[i, :]),
-                                 sum(self.RUH[i, :]),
-                                 sum(self.SVH[i, :]),
-                                 sum(self.EVH[i, :]),
-                                 sum(self.IVH[i, :]),
-                                 sum(self.RVH[i, :]))))
+                                (sum(self.EU[i, :]),
+                                 sum(self.IU[i, :]),
+                                 sum(self.RU[i, :]),
+                                 sum(self.SV[i, :]),
+                                 sum(self.EV[i, :]),
+                                 sum(self.IV[i, :]),
+                                 sum(self.RV[i, :]))))
     
     def outputInfo(self):
         print 'R0:\t\t\t %g' % self.parameters.R0
         print 'Infections:\t\t %g' % self.totalInfections
         print 'Deaths:\t\t\t %g' % self.totalDeaths
         print 'Hospitalizations:\t %g' % self.totalHospitalizations
-        print 'YLL:\t\t\t %g' % self.YLL
-        print 'Contingent:\t\t %g' % self.CV
-	print ('Age-specific infections:'), list(self.infections), sum(list(self.infections))
+        print ('Age-specific infections:'), list(self.infections), sum(list(self.infections))
 
     def getDumpData(self, runData = True):
         dumpData = fileIO.dumpContainer()
