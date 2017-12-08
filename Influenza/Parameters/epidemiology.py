@@ -201,15 +201,9 @@ vaccineEfficacyVsDeathPW = PiecewiseAgeRate(
 #: +-----------------------------------------------+------------------------+
 #:
 
-# not implemented
+# not implemented. Set to zero
 proportionHighRiskPW = PiecewiseAgeRate(
-    [numpy.random.normal(0.0415, 0.0044),
-     numpy.random.normal(0.0883, 0.0051),
-     numpy.random.normal(0.1168, 0.0030),
-     numpy.random.normal(0.1235, 0.0055),
-     numpy.random.normal(0.1570, 0.0027),
-     numpy.random.normal(0.3056, 0.0044),
-     numpy.random.normal(0.4701, 0.0050)],
+    [0,0,0,0,0,0,0],
     [0, 2, 5, 19, 25, 50, 65])
 
 #:

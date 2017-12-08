@@ -303,7 +303,7 @@ class Simulation:
         self.infectionsU  = self.infectionsUL + self.infectionsUH
         self.infectionsV  = self.infectionsVL + self.infectionsVH
         self.infections   = self.infectionsL  + self.infectionsH
-        self.totalInfections = self.infections.sum()
+	self.totalInfections = self.infections.sum()
         
         self.hospitalizationsL = self.infectionsL \
                                  * self.parameters.caseHospitalizationL
