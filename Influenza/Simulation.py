@@ -352,24 +352,14 @@ class Simulation:
 	##values with the matrix defined in S.130
         self.parameters.proportionVaccinatedL = \
            self.parameters.proportionVaccinatedLPW.full(self.parameters.ages)
-        self.parameters.proportionVaccinatedHPW.values = \
-           PVPWVal[self.parameters.proportionVaccinatedLLength :]
-	## -->found bug in the below line. Should be HPW.full instead of LPW.full. Corrected the bug
-	## calculate proportion of high-risk individuals of in diff age groups to be vaccinated by 
-	## multiplying the matrix at S1.31
-        self.parameters.proportionVaccinatedH = \
-           self.parameters.proportionVaccinatedHPW.full(self.parameters.ages)
+	
 	if self.hasSolution:
             IC = self.getLastValues()
-            vacsUsed = (self.parameters.proportionVaccinatedL * IC[0]).sum() \
-                + (self.parameters.proportionVaccinatedH * IC[8]).sum()
+            vacsUsed = (self.parameters.proportionVaccinatedL * IC[0]).sum()
+
         else:
             vacsUsed = (self.parameters.proportionVaccinatedL
-                        * self.parameters.population
-                        * (1 - self.parameters.proportionHighRisk)).sum() \
-                        + (self.parameters.proportionVaccinatedH
-                           * self.parameters.population
-                           * self.parameters.proportionHighRisk).sum()
+                        * self.parameters.population).sum() 
 
         # Update initial condition for ODEs
         self.updateIC()
@@ -440,6 +430,7 @@ class Simulation:
         print 'Hospitalizations:\t %g' % self.totalHospitalizations
         print 'YLL:\t\t\t %g' % self.YLL
         print 'Contingent:\t\t %g' % self.CV
+	print ('Age-specific infections:'), list(self.infections), sum(list(self.infections))
 
     def getDumpData(self, runData = True):
         dumpData = fileIO.dumpContainer()
