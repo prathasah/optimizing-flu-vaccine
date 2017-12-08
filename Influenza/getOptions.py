@@ -93,7 +93,7 @@ def getOptions(simType = 'Simulation'):
         p.add_option_group(g)
 
     (options, args) = p.parse_args()
-    print ("check!!!"), options,args
+   
 
     if simType == 'Optimization':
         # vacSchedule is in positional arguments, not options
