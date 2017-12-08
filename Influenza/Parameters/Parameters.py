@@ -1,5 +1,5 @@
 from PiecewiseAgeParameter import PiecewiseAgeParameter, PiecewiseAgeRate
-from ages import ages, vaccinationLowRiskAges, vaccinationHighRiskAges
+from ages import ages, vaccinationAges
 import demography
 import epidemiology
 import costs
@@ -72,60 +72,22 @@ class Parameters:
         # Compute mortality rates
         # from case mortalities
 
-	##equatiion S1.5: Mortality of low risk individuals
-        self.caseMortalityL = self.caseMortality \
-                              / (1 +
-                                 (self.highRiskRelativeCaseMortality - 1)
-                                 * self.proportionHighRisk)
-	##Mortality of high risk individuals
-        self.caseMortalityH = self.caseMortalityL \
-                              * self.highRiskRelativeCaseMortality
-	# Mortality of low risk *vaccinated* risk individuals
-        self.caseMortalityVL = self.caseMortalityL \
+	# Mortality of *vaccinated* risk individuals
+        self.caseMortalityV = self.caseMortality \
                                * (1 - self.vaccineEfficacyVsDeath)
-	##Mortality of high risk *vaccinated* risk individuals
-        self.caseMortalityVH = self.caseMortalityVL \
-                               * self.highRiskRelativeCaseMortality
 	
-	##equation S1.7. Death rate of low-risk unvaccinated individuals
-        self.deathRateUL = self.recoveryRate \
-                           * self.caseMortalityL \
-                           / (1 - self.caseMortalityL)
-	##Death rate of low-risk vaccinated individuals
-        self.deathRateVL = self.recoveryRate \
-                           * self.caseMortalityVL \
-                           / (1 - self.caseMortalityVL)
-	##Death rate of high-risk unvaccinated individuals
-        self.deathRateUH = self.recoveryRate \
-                           * self.caseMortalityH \
-                           / (1 - self.caseMortalityH)
-	##Death rate of high-risk vaccinated individuals
-        self.deathRateVH = self.recoveryRate \
-                           * self.caseMortalityVH \
-                           / (1 - self.caseMortalityVH)
-
-        # Compute specific case hospitalizations
-        self.caseHospitalizationL = self.caseHospitalization \
-           / (1 + (self.highRiskRelativeCaseHospitalization - 1)
-              * self.proportionHighRisk)
-        self.caseHospitalizationH = self.highRiskRelativeCaseHospitalization \
-                                    * self.caseHospitalizationL
-
+	##Death rate of unvaccinated individuals
+        self.deathRateU = (self.recoveryRate * self.caseMortality) / (1 - self.caseMortality)
+	##Death rate of vaccinated individuals
+        self.deathRateV = (self.recoveryRate * self.caseMortalityV)/ (1 - self.caseMortalityV)
+	
         # Set up proportion vaccinated vectors
-        self.proportionVaccinatedLPW = PiecewiseAgeRate(
-            [0.0] * len(vaccinationLowRiskAges),
-            vaccinationLowRiskAges)
-        self.proportionVaccinatedHPW = PiecewiseAgeRate(
-            [0.0] * len(vaccinationHighRiskAges),
-            vaccinationHighRiskAges)
-        self.proportionVaccinatedL = \
-                                   self.proportionVaccinatedLPW.full(self.ages)
-        self.proportionVaccinatedH = \
-                                   self.proportionVaccinatedHPW.full(self.ages)
-        self.proportionVaccinatedLLength = len(vaccinationLowRiskAges)
-        self.proportionVaccinatedHLength = len(vaccinationHighRiskAges)
-        self.proportionVaccinatedLength = self.proportionVaccinatedLLength \
-                                          + self.proportionVaccinatedHLength
+        self.proportionVaccinatedPW = PiecewiseAgeRate(
+            [0.0] * len(vaccinationAges),
+            vaccinationAges)
+	self.proportionVaccinated = self.proportionVaccinatedPW.full(self.ages)
+        self.proportionVaccinatedLength = len(vaccinationAges)
+        
 
         # Get contact matrix
         if 'contactMatrix' in paramValues:
@@ -145,39 +107,26 @@ class Parameters:
 	#print ("Check1"), self.transmissionScaling
         
     def computeR0(self):
+	#normalized population size for each age groups
         s0 = self.population / sum(self.population)
-        sL0 = s0 * (1 - self.proportionHighRisk)
-        sH0 = s0 * self.proportionHighRisk
-        sUL0 = sL0 * (1 - self.proportionVaccinatedL)
-        sVL0 = sL0 * self.proportionVaccinatedL
-        sUH0 = sH0 * (1 - self.proportionVaccinatedH)
-        sVH0 = sH0 * self.proportionVaccinatedH
+	sU0 = s0 * (1 - self.proportionVaccinated)
+	sV0 = s0 * self.proportionVaccinated
+	
 
-        FUL = self.transmissionScaling \
-              * numpy.outer(self.susceptibility * sUL0,
+        FU = self.transmissionScaling \
+              * numpy.outer(self.susceptibility * sU0,
                             self.transmissibility) * self.contactMatrix
-        FUH = self.transmissionScaling \
-              * numpy.outer(self.susceptibility * sUH0,
-                            self.transmissibility) * self.contactMatrix
-        FVL = self.transmissionScaling \
+	FV = self.transmissionScaling \
               * numpy.outer((1 - self.relative_vaccineEfficacyVsInfection)
-                            * self.susceptibility * sVL0,
-                            self.transmissibility) * self.contactMatrix
-        FVH = self.transmissionScaling \
-              * numpy.outer((1 - self.relative_vaccineEfficacyVsInfection)
-                            * self.susceptibility * sVH0,
+                            * self.susceptibility * sV0,
                             self.transmissibility) * self.contactMatrix
         
-        F = numpy.vstack((numpy.hstack((FUL, FUL, FUL, FUL)),
-                          numpy.hstack((FUH, FUH, FUH, FUH)),
-                          numpy.hstack((FVL, FVL, FVL, FVL)),
-                          numpy.hstack((FVH, FVH, FVH, FVH))))
+        F = numpy.vstack((numpy.hstack((FU, FU)),
+                          numpy.hstack((FV, FV))))
 
         V = numpy.diag(numpy.hstack(
-            (self.recoveryRate + self.deathRateUL,
-             self.recoveryRate + self.deathRateUH,
-             self.recoveryRate + self.deathRateVL,
-             self.recoveryRate + self.deathRateVH)))
+            (self.recoveryRate + self.deathRateU,
+             self.recoveryRate + self.deathRateV)))
 
         G = numpy.dot(F, numpy.linalg.inv(V))
 
@@ -194,9 +143,8 @@ class Parameters:
     def getDumpData(self, runData = True):
         dumpData = fileIO.dumpContainer()
 
-        #dumpData.ages = self.ages
-        #dumpData.population = self.population
-        #dumpData.proportionHighRisk = self.proportionHighRiskPW
+        dumpData.ages = self.ages
+        dumpData.population = self.population
         dumpData.R0 = self.R0
         dumpData.recoveryRate = self.recoveryRatePW
         dumpData.latencyRate = self.latencyRatePW
