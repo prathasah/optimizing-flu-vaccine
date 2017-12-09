@@ -1,10 +1,13 @@
 import fileIO
 import numpy
+import sys
+sys.path.insert(0, r'./Influenza/Parameters')
+import Parameters
         
-class Simulation:
+class run_Simulation:
     def __init__(self, options = None, tMax = 120, paramValues = {}):
+	reload(Parameters)
         self.tMax = tMax
-	
 
         if options != None:
             self.options = options
@@ -14,7 +17,7 @@ class Simulation:
 	    
 
         # Must wait until after options, where RNG seed is set
-        Parameters = __import__('Parameters', globals())
+       # Parameters = __import__('Parameters', globals())
 
         self.parameters = Parameters.Parameters(**paramValues)
 
@@ -306,7 +309,7 @@ class Simulation:
     def debug_info(self):
 	#print ("recovery rate ="), self.parameters.recoveryRate 
 	#print ("latency rate=="), self.parameters.latencyRate
-	return self.parameters.deathRateU
+	return self.infectionsU.sum()
 	
 
     def vaccinated_output(self):

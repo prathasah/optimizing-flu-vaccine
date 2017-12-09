@@ -1,12 +1,37 @@
 import numpy as np
 import csv
 import random
-
-sys_random = random.SystemRandom()
+import efficacy_vs_coverage 
+import os
 ###########################################3
 niter = 5
 hosp = np.zeros((niter,17))
 inf = np.zeros((niter,17))
+############################################
+def delete_cache():
+
+	import os
+
+	# Produces a sorted list of all files in a directory
+	dirList = os.listdir("./Influenza")   # Use os.listdir() if want current directory
+	dirList.sort()
+
+	# Takes advantage of fact that both py and pyc files will share same name and
+	# that pyc files will appear immediately after their py counterparts in dirList
+
+	lastPyName = ""
+
+	for file in dirList:
+	    if file[-4:] == ".pyc":
+		os.remove("./Influenza/"+str(file))
+	
+	#print ("check!!"), dirList	
+	    #if file[-3:] == ".py":
+	    #	lastPyName = file[:-3]
+	    #elif file[-4:] == ".pyc":
+	    #	if lastPyName == file[:-4]:
+		    #os.remove(lastPyName + ".py")
+		    #os.remove(lastPyName + ".pyc") # In case you want to delete this too
 
 ##################################################################
 #write csv
@@ -29,11 +54,15 @@ for vacEfficacy in [0.1]:
 	#for relative_coverage in np.arange(0,1, 0.01):
 	for relative_coverage in [0.4]:
 		for num in xrange(niter):
-			import efficacy_vs_coverage as efc
-			totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated, infections, hospitalizations,check =efc.run_efficacy_simulation(relative_coverage, vacEfficacy)
+			reload(efficacy_vs_coverage)
+			totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated, infections, hospitalizations,check =efficacy_vs_coverage.run_efficacy_simulation(relative_coverage, vacEfficacy)
 			print ("check!!"), num,check
-		
-		"""
+			delete_cache()
+			
+delete_cache()
+dirList = os.listdir("./Influenza") 
+print dirList		
+"""
 		elem1 = [relative_coverage,vacEfficacy_2017, sum(list(avg_inf))] + list(avg_inf)
 		#print elem1
 		writer1.writerow(elem1)
@@ -42,4 +71,4 @@ for vacEfficacy in [0.1]:
 		writer2.writerow(elem2)
 		elem3 = [relative_coverage,vacEfficacy_2017, totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated]
 		writer3.writerow(elem3)
-		"""
+"""

@@ -4,9 +4,9 @@
 #
 
 from PiecewiseAgeParameter import PiecewiseAgeRate
-
 import numpy
 
+numpy.random.seed()
 #:
 #: +-----------------------------------------------+------------------------+
 #: | Infectious Period                             | Reference              |
@@ -25,6 +25,7 @@ import numpy
 recoveryRatePW = PiecewiseAgeRate(
     [1. / numpy.random.triangular(0.9, 2.5, 4.6)],
     [0])
+
 
 #:
 #: +-----------------------------------------------+------------------------+

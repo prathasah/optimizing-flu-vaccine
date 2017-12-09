@@ -3,7 +3,9 @@ from ages import ages, vaccinationAges
 import demography
 import epidemiology
 import costs
-from .. import fileIO
+import os
+#from .. import fileIO
+
 
 import numpy
 
@@ -15,7 +17,10 @@ class ParamDict(UserDict.UserDict):
         Return value if key is in paramValues dict or return
         default as attribute from object other.
         '''
-        return self.get(key, getattr(other, key))
+	
+	reload(epidemiology)
+	reload(costs)
+	return getattr(other, key)
 
 class Parameters:
     def setPWAttr(self, namePW, value):
@@ -36,10 +41,8 @@ class Parameters:
         taking values from passed paramValues
         or from attributes of object other.
         '''
+	self.setPWAttr(namePW,self.passedParamValues.valueOrAttrFromOther(namePW, other))
 	
-        self.setPWAttr(namePW,
-                       self.passedParamValues.valueOrAttrFromOther(namePW,
-                                                                   other))
 
     def setAttrFromPassedOrOther(self, other, name):
         '''
@@ -51,9 +54,18 @@ class Parameters:
         setattr(self, name,
                 self.passedParamValues.valueOrAttrFromOther(name, other))
 
+##################################################################
+
     def __init__(self, **paramValues):
-        self.passedParamValues = ParamDict(paramValues)
-        self.ages = numpy.array(ages)
+
+	import os
+	dirList = os.listdir("./Influenza/Parameters/") 
+	for file in dirList:
+		if file[-4:] == ".pyc":
+			os.remove("./Influenza/Parameters/"+str(file))
+	self.passedParamValues = ParamDict(paramValues)	
+      	
+	self.ages = numpy.array(ages)
 
         # Load in parameters and expand as necessary
 	# Go thrrough each files
@@ -66,7 +78,7 @@ class Parameters:
 		    self.setAttrFromPassedOrOther(m, p)
 		##if it is an agespecific parameter then..
                 elif isinstance(getattr(m, p),
-                                PiecewiseAgeParameter):
+                                PiecewiseAgeParameter): 
 		    self.setPWAttrFromPassedOrOther(m, p)
 
         # Compute mortality rates
@@ -102,9 +114,8 @@ class Parameters:
 
         # One last parameter to fit to R0
         self.transmissionScaling = 1.0
-	#print ("Check1"), self.transmissionScaling, self.computeR0()
-        self.transmissionScaling *=  self.R0 / self.computeR0()
-	#print ("Check1"), self.transmissionScaling
+	self.transmissionScaling *=  self.R0 / self.computeR0()
+	
         
     def computeR0(self):
 	#normalized population size for each age groups
@@ -167,4 +178,4 @@ class Parameters:
 
         return dumpData
 
-    dump = fileIO.dump
+    #dump = fileIO.dump
