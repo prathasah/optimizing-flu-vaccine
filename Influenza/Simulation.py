@@ -306,7 +306,6 @@ class Simulation:
     def debug_info(self):
 	#print ("recovery rate ="), self.parameters.recoveryRate 
 	#print ("latency rate=="), self.parameters.latencyRate
-	print ("seed"), self.options.seed
 	return self.parameters.deathRateU
 	
 

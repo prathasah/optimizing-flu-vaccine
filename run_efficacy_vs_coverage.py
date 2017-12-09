@@ -1,4 +1,3 @@
-import efficacy_vs_coverage as efc
 import numpy as np
 import csv
 import random
@@ -30,6 +29,7 @@ for vacEfficacy in [0.1]:
 	#for relative_coverage in np.arange(0,1, 0.01):
 	for relative_coverage in [0.4]:
 		for num in xrange(niter):
+			import efficacy_vs_coverage as efc
 			totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated, infections, hospitalizations,check =efc.run_efficacy_simulation(relative_coverage, vacEfficacy)
 			print ("check!!"), num,check
 		
