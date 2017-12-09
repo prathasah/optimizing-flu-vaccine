@@ -63,17 +63,17 @@ def getOptions(simType = 'Simulation'):
 
     p = optparse.OptionParser()
 
-    #p.add_option('-s', '--seed', action = 'callback',
-     #            dest = 'seed',
-     #            callback = handleRandomSeed,
-    #             type = 'string', default = defaultSeed,
-    #             help = 'seed for random-number generator')
+    p.add_option('-s', '--seed', action = 'callback',
+                dest = 'seed',
+                callback = handleRandomSeed,
+                 type = 'string', default = defaultSeed,
+                 help = 'seed for random-number generator')
     p.add_option('-q', '--quiet', action = 'store_true',
                  dest = 'quiet', default = False,
                  help = 'do not output')
-    #p.add_option('-d', '--debug', action = 'store_true',
-    #             dest = 'debug', default = False,
-    #             help = 'output debugging info')
+    p.add_option('-d', '--debug', action = 'store_true',
+                 dest = 'debug', default = False,
+                 help = 'output debugging info')
 
     if simType == 'Optimization':
         p.set_usage(
@@ -93,12 +93,13 @@ def getOptions(simType = 'Simulation'):
         p.add_option_group(g)
 
     (options, args) = p.parse_args()
+    print ("check!!"), options, args
    
 
     if simType == 'Optimization':
         # vacSchedule is in positional arguments, not options
         # Dummy option container
-	print ("vac option"), optparse.Option('-v',dest = 'vacSchedule')
+	#print ("vac option"), optparse.Option('-v',dest = 'vacSchedule')
         vacSchedOption = optparse.Option('-v', dest = 'vacSchedule')
 	
         setVacSchedule(vacSchedOption, 'vacSchedule', args, p)

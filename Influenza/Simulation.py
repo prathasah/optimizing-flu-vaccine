@@ -1,16 +1,17 @@
 import fileIO
-
 import numpy
         
 class Simulation:
-    def __init__(self, options = None, tMax = 1000, paramValues = {}):
+    def __init__(self, options = None, tMax = 120, paramValues = {}):
         self.tMax = tMax
+	
 
         if options != None:
             self.options = options
+	   
         else:
             from getOptions import getOptions
-            self.options = getOptions('Simulation')
+	    
 
         # Must wait until after options, where RNG seed is set
         Parameters = __import__('Parameters', globals())
@@ -152,7 +153,6 @@ class Simulation:
                         self.Y0.copy(),
                         self.T,
                         mxstep = 1000)
-        
         Z = self.Y.copy()
         self.SU = Z[:,  0 : : 8]
         self.EU = Z[:,  1 : : 8]
@@ -289,13 +289,27 @@ class Simulation:
     
     def outputInfo(self):
         print 'R0:\t\t\t %g' % self.parameters.R0
-        print 'Infections:\t\t %g' % self.totalInfections
+        print ('Infections (in millions):'),  self.totalInfections/1000000.
         print 'Deaths:\t\t\t %g' % self.totalDeaths
         print 'Hospitalizations:\t %g' % self.totalHospitalizations
-        print ('Age-specific infections:'), list(self.infections)
+        #print ('Age-specific infections:'), list(self.infections)
+	print ("unvaccinated"),self.infectionsU.sum()
+	print ("vaccinated"),self.infectionsV.sum()
+	print ("total pop size"), self.parameters.population.sum()
+	print ("total unvaccinated"),  ((1 - self.parameters.proportionVaccinated) * self.parameters.population).sum()
+	print ("total vaccinated"),  ((self.parameters.proportionVaccinated) * self.parameters.population).sum()
+
 
     def short_output(self):
 	return list(self.infections), list(self.hospitalizations)
+
+    def debug_info(self):
+	#print ("recovery rate ="), self.parameters.recoveryRate 
+	#print ("latency rate=="), self.parameters.latencyRate
+	return self.parameters.deathRateU
+
+    def vaccinated_output(self):
+        return self.parameters.population.sum(),((1 - self.parameters.proportionVaccinated) * self.parameters.population).sum(), ((self.parameters.proportionVaccinated) * self.parameters.population).sum(), self.infectionsU.sum(), self.infectionsV.sum()
 
     def getDumpData(self, runData = True):
         dumpData = fileIO.dumpContainer()

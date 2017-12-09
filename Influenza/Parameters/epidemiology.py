@@ -73,11 +73,7 @@ susceptibilityPW = PiecewiseAgeRate(
     [0, 5, 25, 50, 65])
 
 
-#normalized average of vaccination coverage 
-## across different age groups
-coverageRatePW = PiecewiseAgeRate(
-	[0.2625729893, 0.2016073335, 0.1210523011, 0.1689583726, 0.2458090036
-],[0,5,18,50,65])
+
 
 #: Placeholder value.  Set later by fixing R0.
 transmissibilityPW = PiecewiseAgeRate(
