@@ -306,7 +306,9 @@ class Simulation:
     def debug_info(self):
 	#print ("recovery rate ="), self.parameters.recoveryRate 
 	#print ("latency rate=="), self.parameters.latencyRate
+	print ("seed"), self.options.seed
 	return self.parameters.deathRateU
+	
 
     def vaccinated_output(self):
         return self.parameters.population.sum(),((1 - self.parameters.proportionVaccinated) * self.parameters.population).sum(), ((self.parameters.proportionVaccinated) * self.parameters.population).sum(), self.infectionsU.sum(), self.infectionsV.sum()

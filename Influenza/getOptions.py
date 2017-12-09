@@ -1,20 +1,21 @@
-#def setRandomSeed(value):
-#    # Convert to hex
-#    from binascii import hexlify
-#    seed = hexlify(value)
+def setRandomSeed(value):
+    # Convert to hex
+    from binascii import hexlify
+    seed = hexlify(value)
 
-#    # Convert into list of ints
-#    from sys import maxint
-#    S = [long(seed, 16)]
-#    while S[-1] > maxint:
-#        S.insert(0, int(S[-1] % maxint))
-#        S[-1] = S[-1] / maxint
-#    S[-1] = int(S[-1])
+    # Convert into list of ints
+    #from sys import maxint
+    S = [long(seed, 16)]
+    maxint = 4294967295
+    while S[-1] > maxint:
+        S.insert(0, int(S[-1] % maxint))
+        S[-1] = S[-1] / maxint
+    S[-1] = int(S[-1])
 
-#    import numpy.random
-#    numpy.random.seed(S)
+    import numpy.random
+    numpy.random.seed(S)
 
-#    return seed
+    return seed
 
 # Set the default RNG seed from the system's random pool
 # This is what numpy does by default
@@ -22,8 +23,8 @@ from os import urandom
 import numpy as np
 import random
 
-#defaultSeed = setRandomSeed(urandom(16))
-defaultSeed = np.random.seed()
+defaultSeed = setRandomSeed(urandom(16))
+#defaultSeed = np.random.seed()
 
 def handleRandomSeed(option, opt_str, value, parser):
     seed = setRandomSeed(value)
