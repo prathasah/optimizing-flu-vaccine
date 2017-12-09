@@ -148,11 +148,16 @@ transmissibilityPW = PiecewiseAgeRate(
 #: +-----------------------------------------------+------------------------+
 #: 
 
-##vaccines not given to <6month old. For rest of age groups, relative vaccine efficacy is
-## same
+##vaccines not given to <6month old. 
 relative_vaccineEfficacyVsInfectionPW = PiecewiseAgeRate(
-    [0,1,1,1],
-    [0,0.5, 16,65])
+    [0,
+     numpy.random.triangular(0.4, 0.7, 1.),
+     numpy.random.triangular(0.5, 0.7, 0.9),
+     numpy.random.triangular(0.4, 0.5, 0.6)],
+    [0,
+     0.5,
+     16,
+     65])
 
 
 #: 
