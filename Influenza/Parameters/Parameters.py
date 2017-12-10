@@ -58,11 +58,6 @@ class Parameters:
 
     def __init__(self, **paramValues):
 
-	import os
-	dirList = os.listdir("./Influenza/Parameters/") 
-	for file in dirList:
-		if file[-4:] == ".pyc":
-			os.remove("./Influenza/Parameters/"+str(file))
 	self.passedParamValues = ParamDict(paramValues)	
       	
 	self.ages = numpy.array(ages)

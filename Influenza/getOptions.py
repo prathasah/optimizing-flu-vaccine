@@ -75,7 +75,7 @@ def getOptions(simType = 'Simulation'):
     p.add_option('-d', '--debug', action = 'store_true',
                  dest = 'debug', default = False,
                  help = 'output debugging info')
-
+    
     if simType == 'Optimization':
         p.set_usage(
             'Usage: %prog [options] vacTime0 vacNumber0 [vacTime1 vacNumber1 ...]')
@@ -94,7 +94,7 @@ def getOptions(simType = 'Simulation'):
         p.add_option_group(g)
 
     (options, args) = p.parse_args()
-    print ("check!!"), options, args
+    
    
 
     if simType == 'Optimization':

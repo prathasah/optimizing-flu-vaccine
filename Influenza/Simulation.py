@@ -157,7 +157,7 @@ class run_Simulation:
                         self.T,
                         mxstep = 1000)
         Z = self.Y.copy()
-        self.SU = Z[:,  0 : : 8]
+	self.SU = Z[:,  0 : : 8]
         self.EU = Z[:,  1 : : 8]
         self.IU = Z[:,  2 : : 8]
         self.RU = Z[:,  3 : : 8]
