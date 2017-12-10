@@ -23,7 +23,7 @@ def normalizeObjectiveName(objective):
 def formatVacSchedule(vacSchedule):
     s = []
     
-    for (t, v) in vacSchedule:
-        s.append('(%g, %g)' % (t, v))
+    for (t, v, e) in vacSchedule:
+        s.append('(%g, %g, %g)' % (t, v, e))
 
     return ', '.join(s)

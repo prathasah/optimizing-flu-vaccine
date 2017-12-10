@@ -6,7 +6,7 @@ import Optimization
 o = Optimization.Optimization()
 
 if not o.options.quiet:
-    from Influenza.miscellany import formatVacSchedule
+    from miscellany import formatVacSchedule
     print 'Vaccine schedule:\t %s' % formatVacSchedule(o.options.vacSchedule)
     print 'Objective:\t\t %s' % o.options.objective
 

@@ -43,17 +43,18 @@ def setVacSchedule(option, opt_str, value, parser):
         parser.print_usage()
         raise ValueError, "Vaccine Information Needed!"
 
-    elif len(value) % 2 != 0:
-        parser.print_usage()
+    elif len(value) % 3 != 0:
+	parser.print_usage()
         raise ValueError, \
-            "Vaccine Information must be in (time, number) pairs!"
+            "Enter Vaccine Information as <objective> <vactime> <vacnumber> <vacefficacy>!"
 
     else:
         while len(value) > 0:
             try:
                 getattr(parser.values,
                         option.dest).append((float(value.pop(0)),
-                                             float(value.pop(0))))
+                                             float(value.pop(0)),
+					     float(value.pop(0))))
             except ValueError:
                 parser.print_usage()
                 raise ValueError, \
@@ -94,6 +95,7 @@ def getOptions(simType = 'Simulation'):
         p.add_option_group(g)
 
     (options, args) = p.parse_args()
+    print ("strep 1"), options, args
     
    
 

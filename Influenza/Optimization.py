@@ -22,13 +22,14 @@ class Optimization:
         
         self.vacTimes = numpy.array([v[0] for v in self.options.vacSchedule])
         self.vacNumbers = numpy.array([v[1] for v in self.options.vacSchedule])
+	self.vacEfficacy = numpy.array([v[2] for v in self.options.vacSchedule])
         self.nVacRounds = len(self.vacTimes)
 
         self.objective = self.options.objective
 
-        from Simulation import Simulation
+        from Simulation import run_Simulation
 
-        self.s = Simulation(options = self.options, *args, **kwargs)
+        self.s = run_Simulation(options = self.options, *args, **kwargs)
 
         self.PVUsed = None
 
@@ -37,8 +38,8 @@ class Optimization:
     def solve(self, PVPWVals):
         # Only update for new PVPWVals
         if numpy.any(PVPWVals != self.PVUsed):
-            self.vacsUsed = self.s.simulateWithVaccine(self.vacTimes,
-                                                       PVPWVals)
+	    self.vacsUsed = self.s.simulateWithVaccine(self.vacTimes,
+                                                       PVPWVals, self.vacEfficacy[0])
 
             self.PVUsed = PVPWVals.copy()
 
@@ -96,7 +97,7 @@ class Optimization:
                 minObjective = self.evaluateObjective(PVPWValsOpt)
                 self.PVBest = PVPWValsOpt
         
-        self.solve(self.PVBest)
+	self.solve(self.PVBest)
 
         if self.options.write:
             self.dump(self.openDumpFile())
