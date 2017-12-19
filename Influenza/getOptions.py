@@ -95,7 +95,6 @@ def getOptions(simType = 'Simulation'):
         p.add_option_group(g)
 
     (options, args) = p.parse_args()
-    print ("strep 1"), options, args
     
    
 

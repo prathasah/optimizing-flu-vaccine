@@ -8,7 +8,9 @@ library(RColorBrewer)   # for brewer.pal(...)
 library(cowplot)
 library(Hmisc)
 ################################################################
-dt <- read.csv("../data/vaccinated_comparisons_8Dec2017.csv", header=T)
+dta <- read.csv("../data/vaccinated_comparisons_8Dec2017.csv", header=T)
+dtb <- read.csv("../data/vaccinated_comparisons_8Dec2017_v2.csv", header=T)
+dt <- rbind(dta,dtb)
 str(dt)
 
 dt$vac_prob_infection <- dt$vaccinated_total_infections/dt$total_vaccinated
@@ -32,7 +34,7 @@ p1 <- ggplot(dx, aes(x= vaccine_efficacy, y = OR.vax,  color = relative_coverage
   geom_point()+ geom_smooth(method = "loess") +ylim(0.5,1)+
   ylab("Odds ratio of being infected for vaccinated")+xlab("Vaccine efficacy")
 p1
-ggsave("odds_ratio_vaccinated_being_infected.pdf", p1, height=6, width = 8)
+ggsave("odds_ratio_vaccinated_being_infected_50iter.pdf", p1, height=6, width = 8)
 
 dx2 <- rbind(dt3,dt4,dt5)
 m1 <- lm(unvac_prob_infection ~ vaccine_efficacy, data=dx2)
@@ -42,7 +44,7 @@ p2 <- ggplot(dx2, aes(x= vaccine_efficacy, y = unvac_prob_infection))+
   ylab("P(infection) for unvaccinated individuals")+
   xlab("Vaccine efficacy")
 p2
-ggsave("herd_immunity.pdf", p2, height=4, width = 5)
+ggsave("herd_immunity_50iter.pdf", p2, height=4, width = 5)
 
 dt1 <- dt[,c("relative_coverage", "vaccine_efficacy", "vac_prob_infection")]
 dt2 <- dt[,c("relative_coverage", "vaccine_efficacy", "unvac_prob_infection")]

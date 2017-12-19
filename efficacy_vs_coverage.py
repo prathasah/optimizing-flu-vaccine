@@ -13,10 +13,10 @@ def run_efficacy_simulation(relative_coverage, vacEfficacy):
 	absolute_coverage = [(relative_coverage*num/np.mean(typical_coverage)) for num in typical_coverage]
 	s = Simulation.run_Simulation()
 	vacsUsed = s.simulateWithVaccine([0],absolute_coverage, vacEfficacy )
-	infections, hospitalizations = s.short_output()
+	infections, hospitalizations, mortality = s.short_output()
 	check = s.debug_info()
 	totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated = s.vaccinated_output()
-	return totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated, infections, hospitalizations, check
+	return totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated, infections, hospitalizations, mortality, check
 		
 		
 		

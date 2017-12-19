@@ -5,7 +5,7 @@ sys.path.insert(0, r'./Influenza/Parameters')
 import Parameters
         
 class run_Simulation:
-    def __init__(self, options = None, tMax = 120, paramValues = {}):
+    def __init__(self, options = None, tMax = 1000, paramValues = {}):
 	reload(Parameters)
         self.tMax = tMax
 
@@ -211,6 +211,13 @@ class run_Simulation:
 
         self.deaths  = self.deathsU + self.deathsV
         self.totalDeaths = self.deaths.sum()
+	self.totalBurden = self.totalDeaths + self.totalInfections
+	self.YLL = numpy.dot(self.parameters.expectationOfLife,
+                             self.deaths)
+
+	#Years lived with disability
+	self.YLD = self.parameters.disabilityWeight * self.totalInfections * (1./self.parameters.recoveryRate)
+	self.DALY = (self.YLL + self.YLD).sum()
         
         
     def simulate(self):
@@ -246,7 +253,7 @@ class run_Simulation:
 
         # Convert flat vector to 2-D array
         if numpy.ndim(PVPWVals) != 2:
-            PVPWVals = numpy.asarray(PVPWVals).reshape(
+	    PVPWVals = numpy.asarray(PVPWVals).reshape(
                 (nVacRounds,
                  self.parameters.proportionVaccinatedLength))
 
@@ -303,8 +310,11 @@ class run_Simulation:
 	print ("total vaccinated"),  ((self.parameters.proportionVaccinated) * self.parameters.population).sum()
 
 
+    def optimization_output(self):
+	return self.parameters.R0, self.parameters.proportionVaccinated, (self.parameters.proportionVaccinated * self.parameters.population)
+
     def short_output(self):
-	return list(self.infections), list(self.hospitalizations)
+	return list(self.infections), list(self.hospitalizations), list(self.deaths)
 
     def debug_info(self):
 	#print ("recovery rate ="), self.parameters.recoveryRate 

@@ -296,4 +296,5 @@ caseMortalityPW = PiecewiseAgeRate(
 #: | 1.3--1.7                                      | Yang et al., 2009      |
 #: +-----------------------------------------------+------------------------+
 #:
-R0 = numpy.random.triangular(1.2, 1.5, 4.0)
+## changed R0 range
+R0 = numpy.random.triangular(1.2, 1.5, 2.0)

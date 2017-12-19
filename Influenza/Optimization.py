@@ -1,10 +1,11 @@
 import fileIO
-
 import numpy
+numpy.warnings.filterwarnings('ignore')
 
 class Optimization:
     objectiveMap = {'Infections': 'totalInfections',
                     'Deaths': 'totalDeaths',
+		     'Burden': 'DALY',
                     'Hospitalizations': 'totalHospitalizations',
                     'YLL': 'YLL',
                     'Contingent': 'CV',
@@ -24,88 +25,103 @@ class Optimization:
         self.vacNumbers = numpy.array([v[1] for v in self.options.vacSchedule])
 	self.vacEfficacy = numpy.array([v[2] for v in self.options.vacSchedule])
         self.nVacRounds = len(self.vacTimes)
+	
 
-        self.objective = self.options.objective
+        self.objective = self.options.objective 
 
         from Simulation import run_Simulation
 
         self.s = run_Simulation(options = self.options, *args, **kwargs)
-
+	
         self.PVUsed = None
 
-        self.vacsUsed = numpy.array([0] * self.nVacRounds)
+	self.vacsUsed = numpy.array([0] * self.nVacRounds)
 
     def solve(self, PVPWVals):
         # Only update for new PVPWVals
         if numpy.any(PVPWVals != self.PVUsed):
 	    self.vacsUsed = self.s.simulateWithVaccine(self.vacTimes,
                                                        PVPWVals, self.vacEfficacy[0])
-
-            self.PVUsed = PVPWVals.copy()
+	    self.PVUsed = PVPWVals.copy()
 
     def evaluateObjective(self, PVPWVals):
-        self.solve(PVPWVals)
-        return getattr(self.s, self.objectiveMap[self.objective])
+	""" main objective function to minimize. Returns infection simulation instance and the objective (totalinfections or ....)"""
+	self.solve(PVPWVals)
+	return getattr(self.s, self.objectiveMap[self.objective])
 
     def totalVacsConditions(self, PVPWVals):
-        self.solve(PVPWVals)
-        return (self.vacNumbers - self.vacsUsed)
+	self.solve(PVPWVals)
+	return (self.vacNumbers - self.vacsUsed)
 
     def totalVacsCondition(self, i):
-        return lambda PVPWVals: self.totalVacsConditions(PVPWVals)[i]
+	return lambda PVPWVals: self.totalVacsConditions(PVPWVals)[i]
 
     def lowerCondition(self, i):
-        return lambda PVPWVals: PVPWVals[i]
+	#the min values should be greater than zero
+	return lambda PVPWVals: PVPWVals[i]
 
     def upperCondition(self, i):
+	#1 - PVPWal should be greater than zero
         return lambda PVPWVals: 1.0 - PVPWVals[i]
 
     def optimize(self):
         from scipy.optimize import fmin_cobyla
+	from scipy.optimize import minimize
+	
 
+	##returns [# vax remaining, current prop. vax. for age group 1, 2, 3,4,5, (1- cureent prop. vax. for age groups 1,2,3,4,5]
         conds = [self.totalVacsCondition(i) for i in
-                 range(self.nVacRounds)]
-        conds.extend([self.lowerCondition(i) for i in
+                 range(self.nVacRounds)]	
+	conds.extend([self.lowerCondition(i) for i in
                       range(self.s.parameters.proportionVaccinatedLength
                             * self.nVacRounds)])
+	
         conds.extend([self.upperCondition(i) for i in
                       range(self.s.parameters.proportionVaccinatedLength
                             * self.nVacRounds)])
-        
+	
         minObjective = None
 
         for i in range(self.optimRuns):
             if self.options.debug:
                 print 'Run %d' % (i + 1)
 
-            PV0 = 0.5 * numpy.random.rand(
+	    ## pick random vaccination levels between 0 and 0.5
+	    ## add 0.15 to avoid initial jumps to <0
+            PV0 = 0.1+(0.5 * numpy.random.rand(
                 self.s.parameters.proportionVaccinatedLength
-                * self.nVacRounds)
+                * self.nVacRounds))
+	    
+	    
 
             PVPWValsOpt = fmin_cobyla(self.evaluateObjective,
                                       PV0,
-                                      conds,
+                                     conds,
                                       maxfun = 10000,
-                                      rhobeg = 0.5,
-                                      iprint = 0)
+                                      rhobeg = 0.1,
+	   			      rhoend=0.000001,
+                                     disp = 0)
 
-            if (minObjective == None) \
+	   
+	    
+	    if (minObjective == None) \
                     or (self.evaluateObjective(PVPWValsOpt) < minObjective):
                 if self.options.debug:
-                    print 'Optimum improved.'
+                    print 'Optimum improved.', PVPWValsOpt
                 
                 minObjective = self.evaluateObjective(PVPWValsOpt)
                 self.PVBest = PVPWValsOpt
+		self.simulatedR0, self.propVaccinatedtotal, self.Vaccinatedtotal = self.s.optimization_output()
         
 	self.solve(self.PVBest)
 
-        if self.options.write:
-            self.dump(self.openDumpFile())
+        #if self.options.write:
+        #    self.dump(self.openDumpFile())
 
     def outputInfo(self):
-        print '\nValues:\t\t',
+	print '\nValues:\t\t',
         for PVI in self.PVBest:
-            print ' %g' % PVI,
+            print ' %g' % round(PVI,3),
         print '\n'
         
         print 'Doses:\t\t\t %s' % ', '.join(['%g' % v for v in self.vacsUsed])
@@ -114,6 +130,11 @@ class Optimization:
         print
         
         self.s.outputInfo()
+
+    def short_output(self):
+	return self.simulatedR0, list(self.vacsUsed)[0], self.evaluateObjective(self.PVBest), list(self.PVBest), list(self.propVaccinatedtotal), list(self.Vaccinatedtotal)
+	
+		
 
     def getDumpData(self):
         dumpData = fileIO.dumpContainer()
@@ -139,13 +160,12 @@ class Optimization:
     dumps = fileIO.dumps
     
     def encodeVacSchedule(self):
-        return '_'.join(['%g,%d' % (t, int(v)) for (t, v)
+        return '_'.join(['%g,%d,%g' % (t, int(v), float(e)) for (t, v,e)
                          in self.options.vacSchedule])
 
     def getDumpDir(self):
         from os.path import join
-
-        return join('data', '%s_%s'
+	return join('data', '%s_%s'
                     % (self.encodeVacSchedule(), self.objective))
 
 

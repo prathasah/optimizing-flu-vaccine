@@ -50,8 +50,7 @@ class Parameters:
         taking value from passed paramValues
         or from attributes of object other.
         '''
-	
-        setattr(self, name,
+	setattr(self, name, 
                 self.passedParamValues.valueOrAttrFromOther(name, other))
 
 ##################################################################
@@ -69,7 +68,6 @@ class Parameters:
             for p in dir(m):
 		#if module returns a numbers, then..
                 if isinstance(getattr(m, p),(float, int)):
-		    
 		    self.setAttrFromPassedOrOther(m, p)
 		##if it is an agespecific parameter then..
                 elif isinstance(getattr(m, p),
@@ -93,7 +91,7 @@ class Parameters:
             [0.0] * len(vaccinationAges),
             vaccinationAges)
 	self.proportionVaccinated = self.proportionVaccinatedPW.full(self.ages)
-        self.proportionVaccinatedLength = len(vaccinationAges)
+	self.proportionVaccinatedLength = len(vaccinationAges)
         
 
         # Get contact matrix

@@ -46,5 +46,16 @@ caseHospitalizationPW = PiecewiseAgeRate(
 
 
 
+#https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5081294/#S2: 0.131
+#Burden of Communicable Diseases in Europe Project 2015: 0.051 (and IHME)
+#http://www.rivm.nl/bibliotheek/rapporten/appendix150205001.pdf: for acute infection=
+disabilityWeight= 0.051
+
+
+#: For years of life lost. 
+#: From US Life Tables 2014
+expectationOfLifePW = PiecewiseAgeNumber(
+    [78.9,78.3,74.4,69.5,64.5,59.7,54.9,50.2,45.4,40.7,36.1,31.7, 27.4,23.3,19.4,15.7,12.3,9.2,6.7,4.6,3.2,2.3],
+    [0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100])
 
 
