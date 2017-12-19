@@ -1,8 +1,0 @@
-recoveryRatePW Piecewise constant rate:
-	= 0.587841	for 0 <= a
-check!! 0 69477956.6434
-check!! 1 69477956.6434
-check!! 2 69477956.6434
-check!! 3 69477956.6434
-check!! 4 69477956.6434
-['Simulation.py', 'getOptions.py', 'fileIO.py', 'Parameters', '.gitignore', 'miscellany.py']
