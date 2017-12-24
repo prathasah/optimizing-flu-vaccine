@@ -47,28 +47,45 @@ dt2$elderly <- (100*(dt2$age60 + dt2$age65 + dt2$age70 + dt2$age75))/pop.elderly
 ######
 ## pull some numbers for the paper
 
-## infections, high efficacy vaccine
-base.infection <- dt1[(dt1$relative_coverage=="54") & (dt1$vaccine_efficacy=="50"),]$infection_per_million
-high.coverage.infection<- dt1[(dt1$relative_coverage=="60") & (dt1$vaccine_efficacy=="50"),]$infection_per_million
+## increase in coverage for typical efficacy vaccine: decrease in infection numbers
+base.infection <- dt1[(dt1$relative_coverage=="40") & (dt1$vaccine_efficacy=="50"),]$infection_per_million
+high.coverage.infection<- dt1[(dt1$relative_coverage=="50") & (dt1$vaccine_efficacy=="50"),]$infection_per_million
 perc.decrease <- ((base.infection - high.coverage.infection)*100)/base.infection
 perc.decrease
 
-
-### for low efficacy
-base.infection <- dt1[(dt1$relative_coverage=="54") & (dt1$vaccine_efficacy=="15"),]$infection_per_million
-high.coverage.infection<- dt1[(dt1$relative_coverage=="60") & (dt1$vaccine_efficacy=="15"),]$infection_per_million
-((base.infection - high.coverage.infection)*100)/base.infection
-
-### mortality, high efficacy vaccine
-base.mortality <- dt2[(dt2$relative_coverage=="54") & (dt2$vaccine_efficacy=="50"),]$mortality_per_thousand
-high.coverage.mortality<- dt2[(dt2$relative_coverage=="60") & (dt2$vaccine_efficacy=="50"),]$mortality_per_thousand
+## increase in coverage for typical efficacy vaccine: decrease in mortality numbers
+base.mortality <- dt2[(dt2$relative_coverage=="40") & (dt2$vaccine_efficacy=="50"),]$mortality_per_thousand
+high.coverage.mortality<- dt2[(dt2$relative_coverage=="50") & (dt2$vaccine_efficacy=="50"),]$mortality_per_thousand
 ((base.mortality - high.coverage.mortality)*100)/base.mortality
 
 
-### for low efficacy
-base.mortality <- dt2[(dt2$relative_coverage=="54") & (dt2$vaccine_efficacy=="15"),]$mortality_per_thousand
-high.coverage.mortality<- dt2[(dt2$relative_coverage=="60") & (dt2$vaccine_efficacy=="15"),]$mortality_per_thousand
-((base.mortality - high.coverage.mortality)*100)/base.mortality
+## decrease in effiacy for typical coverage rates: increase in infection numbers
+base.infection <- dt1[(dt1$relative_coverage=="40") & (dt1$vaccine_efficacy=="50"),]$infection_per_million
+low.efficacy.infection<- dt1[(dt1$relative_coverage=="40") & (dt1$vaccine_efficacy=="30"),]$infection_per_million
+((low.efficacy.infection - base.infection)*100)/base.infection
+
+
+## increase in coverage for typical efficacy vaccine: decrease in mortality numbers
+base.mortality <- dt2[(dt2$relative_coverage=="40") & (dt2$vaccine_efficacy=="50"),]$mortality_per_thousand
+low.efficacy.mortality<- dt2[(dt2$relative_coverage=="40") & (dt2$vaccine_efficacy=="30"),]$mortality_per_thousand
+((low.efficacy.mortality -base.mortality)*100)/base.mortality
+
+
+### age-specific vaccine efficacy effects
+a <-dt1[which(dt1$vaccine_efficacy==50 & dt1$relative_coverage==40),] # typical efficacy and coverage
+b <- dt1[which(dt1$vaccine_efficacy==30 & dt1$relative_coverage==30),]
+
+(100*(b$school_children - a$school_children))/a$school_children
+(100*(b$young_adults - a$young_adults))/a$young_adults
+(100*(b$middle_adults - a$middle_adults))/a$middle_adults
+
+c <-dt2[which(dt2$vaccine_efficacy==50 & dt2$relative_coverage==40),]
+d <- dt2[which(dt2$vaccine_efficacy==30 & dt2$relative_coverage==30),]
+
+(100*(d$school_children - c$school_children))/c$school_children
+(100*(d$young_adults - c$young_adults))/c$young_adults
+(100*(d$middle_adults - c$middle_adults))/c$middle_adults
+(100*(d$elderly - c$elderly))/c$elderly
 #####################################################################
 ## some pretty colors
 library(RColorBrewer)
@@ -218,7 +235,7 @@ p2e <- ggplot(dt2, aes(x=vaccine_efficacy, y=relative_coverage, fill = elderly))
 library(gridExtra)
 p2 <- grid.arrange(p1a,p1b,p1c,p1d,p1e, p2a,p2b,p2c,p2d, p2e,nrow = 2, ncol=5, widths= c(1.1,1,1,1,1.45), heights = c(1,1.02))
 g <- arrangeGrob(p2,  bottom=grid::textGrob("Vaccine efficacy (%)",gp = gpar(fontsize = 20)),
-                 left=grid::textGrob("Baseline coverage (%)", rot=90, gp = gpar(fontsize = 20)))
+                 left=grid::textGrob("Population coverage (%)", rot=90, gp = gpar(fontsize = 20)))
 ggsave(filename="../plots/age_specific_efficacy_coverage_100iter.png", plot=g, width = 21, height = 7)
 ggsave(filename="../plots/age_specific_efficacy_coverage_100iter.pdf", plot=g, width = 21, height = 7)
 

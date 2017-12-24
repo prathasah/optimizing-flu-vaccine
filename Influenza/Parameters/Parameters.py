@@ -121,7 +121,7 @@ class Parameters:
               * numpy.outer(self.susceptibility * sU0,
                             self.transmissibility) * self.contactMatrix
 	FV = self.transmissionScaling \
-              * numpy.outer((1 - self.relative_vaccineEfficacyVsInfection)
+              * numpy.outer((1 - self.vaccineEfficacyVsInfection)
                             * self.susceptibility * sV0,
                             self.transmissibility) * self.contactMatrix
         

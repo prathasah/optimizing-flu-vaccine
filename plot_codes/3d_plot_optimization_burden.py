@@ -30,16 +30,16 @@ for (num,col) in zip(xrange(n), my_distinct_colors):
 	dz = di["doses"]
 	ax1.bar3d(xpos, ypos, zpos, dx,dy,dz, color=col, alpha=0.9)
 
-print ("check!"), len(efficacy_groups),np.arange(1,8,1), [efficacy_groups[num] for num in np.arange(0,8,1)]
+#print ("check!"), len(efficacy_groups),np.arange(1,8,1), [efficacy_groups[num] for num in np.arange(0,8,1)]
 
 ax1.set_title('Minimizing burden', fontsize=22)
-ax1.set_xlabel('Age groups', labelpad =10, fontsize=18)
+ax1.set_xlabel('Age group', labelpad =10, fontsize=18)
 ax1.set_ylabel('Vaccine efficacy (%)', labelpad =10, fontsize=18)
 ax1.set_xticks(np.arange(1,19,1))
 ax1.set_xticklabels([age_groups[num] for num in np.arange(0,17,1)])
 ax1.set_yticks(np.arange(12.5,92.5,10))
 ax1.set_yticklabels([efficacy_groups[num] for num in np.arange(0,8,1)])
 ax1.set_zlabel('Doses (per 100,000)', fontsize=18)
-plt.show()
-#ax1.view_init(elev=36., azim=297)
-#plt.savefig("minimizing_burden.png",  pad_inches=0.01)
+#plt.show()
+ax1.view_init(elev=36., azim=297)
+plt.savefig("minimizing_burden.png",  pad_inches=0.01)

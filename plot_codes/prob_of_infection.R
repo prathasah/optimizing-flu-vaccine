@@ -88,5 +88,5 @@ p2 <- ggplot(dx, aes(x= vaccine_efficacy, y = unvac_prob_infection,  color=relat
 
 library(gridExtra)
 p <- grid.arrange(p1, p2, nrow=1)
-ggsave("individual_level_risks_500iter.png",p, height= 4, width=8)
+ggsave("../plots/individual_level_risks_500iter.png",p, height= 4, width=8)
 

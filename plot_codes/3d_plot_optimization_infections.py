@@ -31,7 +31,7 @@ for (num,col) in zip(xrange(n), my_distinct_colors):
 	ax1.bar3d(xpos, ypos, zpos, dx,dy,dz, color=col, alpha=0.9)
 
 ax1.set_title('Minimizing infections', fontsize=22)
-ax1.set_xlabel('Age groups', labelpad =10, fontsize=18)
+ax1.set_xlabel('Age group', labelpad =10, fontsize=18)
 ax1.set_ylabel('Vaccine efficacy (%)', labelpad =10, fontsize=18)
 ax1.set_xticks(np.arange(1,19,1))
 ax1.set_xticklabels([age_groups[num] for num in np.arange(0,17,1)])
