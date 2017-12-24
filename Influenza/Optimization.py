@@ -31,7 +31,7 @@ class Optimization:
 
         from Simulation import run_Simulation
 
-        self.s = run_Simulation(options = self.options, *args, **kwargs)
+        self.s = run_Simulation(options = self.options, paramValues = {"vacEfficacy":self.vacEfficacy[0]}, *args, **kwargs)
 	
         self.PVUsed = None
 

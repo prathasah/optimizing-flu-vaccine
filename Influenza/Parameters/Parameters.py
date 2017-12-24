@@ -4,6 +4,7 @@ import demography
 import epidemiology
 import costs
 import os
+import numpy as np
 #from .. import fileIO
 
 
@@ -58,7 +59,7 @@ class Parameters:
     def __init__(self, **paramValues):
 
 	self.passedParamValues = ParamDict(paramValues)	
-      	
+
 	self.ages = numpy.array(ages)
 
         # Load in parameters and expand as necessary
@@ -73,6 +74,11 @@ class Parameters:
                 elif isinstance(getattr(m, p),
                                 PiecewiseAgeParameter): 
 		    self.setPWAttrFromPassedOrOther(m, p)
+
+	self.vaccineEfficacyVsInfection = self.passedParamValues["vacEfficacy"] * self.relative_vaccineEfficacyVsInfection
+
+	self.vaccineCoverage = [(self.passedParamValues["vacCoverage"]*num/np.mean(self.relative_coverage)) for num in self.relative_coverage]
+
 
         # Compute mortality rates
         # from case mortalities

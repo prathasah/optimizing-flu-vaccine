@@ -26,12 +26,15 @@ class run_Simulation:
 
         self.hasSolution = False
 
+    def vaccine_coverage(self):
+	return self.parameters.vaccineCoverage
+
     def computeR0(self):
         return self.parameters.computeR0()
 
     def getLastValues(self):
         return (self.SU[-1, :], self.EU[-1, :],
-                self.IL[-1, :], self.RU[-1, :],
+                self.IU[-1, :], self.RU[-1, :],
                 self.SV[-1, :], self.EV[-1, :],
                 self.IV[-1, :], self.RV[-1, :])
 
@@ -107,8 +110,8 @@ class run_Simulation:
         dIU = self.parameters.latencyRate * EU \
                - (self.parameters.recoveryRate + self.parameters.deathRateU) * IU
         dRU = self.parameters.recoveryRate * IU
-        dSV = - (1 - self.vaccineEfficacyVsInfection) * Lambda * SV
-        dEV = (1 - self.vaccineEfficacyVsInfection) \
+        dSV = - (1 - self.parameters.vaccineEfficacyVsInfection) * Lambda * SV
+        dEV = (1 - self.parameters.vaccineEfficacyVsInfection) \
                * Lambda * SV - self.parameters.latencyRate * EV
         dIV = self.parameters.latencyRate * EV \
                - (self.parameters.recoveryRate + self.parameters.deathRateV) * IV
@@ -230,6 +233,7 @@ class run_Simulation:
         self.parameters.proportionVaccinatedPW.values = PVPWVal
 	## extend to full ages groups. Proportions calculated by multiplying PVPWVal 
 	##values with the matrix defined in S.130
+
         self.parameters.proportionVaccinated = self.parameters.proportionVaccinatedPW.full(self.parameters.ages)
 	if self.hasSolution:
             IC = self.getLastValues()
@@ -247,12 +251,12 @@ class run_Simulation:
         
     def simulateWithVaccine(self, vacTimes, PVPWVals, vacEfficacy):
 	
-	self.vaccineEfficacyVsInfection = vacEfficacy * self.parameters.relative_vaccineEfficacyVsInfection
 	
         nVacRounds = len(vacTimes)
 
         # Convert flat vector to 2-D array
         if numpy.ndim(PVPWVals) != 2:
+	    #print ("check!!"), nVacRounds,self.parameters.proportionVaccinatedLength, PVPWVals
 	    PVPWVals = numpy.asarray(PVPWVals).reshape(
                 (nVacRounds,
                  self.parameters.proportionVaccinatedLength))
