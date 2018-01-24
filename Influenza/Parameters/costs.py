@@ -46,11 +46,57 @@ caseHospitalizationPW = PiecewiseAgeRate(
 
 
 
-#https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5081294/#S2: 0.131
-#Burden of Communicable Diseases in Europe Project 2015: 0.051 (and IHME)
-#http://www.rivm.nl/bibliotheek/rapporten/appendix150205001.pdf: for acute infection=
-disabilityWeight= 0.051
+#Wielders et al., 2010
+caseARDSfractionPW =  PiecewiseAgeRate(
+    [0.023 * 0.0721, 0.023 * 0.0259, 0.023 * 0.0766, 0.023 * 0.1217, 0.023 * 0.2873, 0.023 * 0.4163],
+    [0, 15, 30, 45, 60, 75])
 
+
+#Meier 2000
+casePneumoniafractionPW =  PiecewiseAgeRate(
+    [0.002, 0.003, 0.003, 0.01],
+    [0, 15, 50, 65])
+
+#Meier 2000
+caseOtitisfractionPW =  PiecewiseAgeRate(
+    [0.04 * 0.994, 0.04* 0.994, 0.007* 0.994, 0.003* 0.994, 0.02* 0.994],
+    [0, 5, 15, 50, 65])
+
+
+caseDeafnessfractionPW =  PiecewiseAgeRate(
+    [0.04 * 0.006, 0.04* 0.006, 0.007* 0.006, 0.003* 0.006, 0.02* 0.006],
+    [0, 5, 15, 50, 65])
+
+#: +--------------------------------------------+-----------------------+
+#: | Disability weight                          | Reference             |
+#: +============================================+=======================+
+#: | 0.006 (Mild)                               | Global burden of      |
+#: +--------------------------------------------+                       |
+#: | 0.051  (Moderate)                          | disease 2016          |
+#: +--------------------------------------------+-----------------------|
+#: | 0.18  (ARDS)                               |  Plass 2014           |
+#: +--------------------------------------------+-----------------------|
+#: | 0.09  (otitis moderate)                    |  IHME            |
+#: +--------------------------------------------+                       |
+#: | 0.18 (Ages 0-4), 0.17 (Ages 5+)            |
+#: |Otitis Deafness                             |     Murray 1996 GBD   |
+#: +--------------------------------------------+-----------------------|
+#: | 0.279                                      |   Niessen 2009        |
+#: +--------------------------------------------+-----------------------+
+
+disabilityWeightUncomplicated = 0.051
+disabilityWeightHospitalizedUncomplicated = 0.133
+disabilityWeightARDS = 0.18
+disabilityWeightPneumonia = 0.279
+disabilityWeightOtitis = 0.09
+disabilityWeightDeafnessPW = PiecewiseAgeRate( 
+	[0.18, 0.17],
+        [0,5])
+
+
+#Niessen 2009
+durationPneumonia = 0.0383562 # 2 weeks
+durationOtitis = 0.0191781  # 1 week
 
 #: For years of life lost. 
 #: From US Life Tables 2014

@@ -5,13 +5,18 @@ numpy.warnings.filterwarnings('ignore')
 class Optimization:
     objectiveMap = {'Infections': 'totalInfections',
                     'Deaths': 'totalDeaths',
-		     'Burden': 'DALY',
+		     'Burden': 'totalDALY',
                     'Hospitalizations': 'totalHospitalizations',
                     'YLL': 'YLL',
                     'Contingent': 'CV',
                     'Cost': 'totalCost'}
+    
+    detailed_objectiveMap = {'Infections': 'infections',
+                    'Deaths': 'deaths',
+		     'Burden': 'DALY',
+                    'Hospitalizations': 'hospitalizations'}
 
-    def __init__(self, options = None, optimRuns = 3,
+    def __init__(self, options = None, optimRuns = 1,
                  *args, **kwargs):
         self.optimRuns = optimRuns
 
@@ -48,6 +53,11 @@ class Optimization:
 	""" main objective function to minimize. Returns infection simulation instance and the objective (totalinfections or ....)"""
 	self.solve(PVPWVals)
 	return getattr(self.s, self.objectiveMap[self.objective])
+    
+    def evaluateDetailedObjective(self, PVPWVals):
+	""" main objective function to minimize. Returns infection simulation instance and the objective (totalinfections or ....)"""
+	self.solve(PVPWVals)
+	return getattr(self.s, self.detailed_objectiveMap[self.objective])
 
     def totalVacsConditions(self, PVPWVals):
 	self.solve(PVPWVals)
@@ -112,6 +122,8 @@ class Optimization:
                 minObjective = self.evaluateObjective(PVPWValsOpt)
                 self.PVBest = PVPWValsOpt
 		self.simulatedR0, self.propVaccinatedtotal, self.Vaccinatedtotal = self.s.optimization_output()
+		self.infections, self.hospitalizations,self.deaths,self.DALY = self.s.short_output()
+		self.DALY, self.YLL, self.YLD = self.s.debug_info()
         
 	self.solve(self.PVBest)
 
@@ -127,12 +139,15 @@ class Optimization:
         print 'Doses:\t\t\t %s' % ', '.join(['%g' % v for v in self.vacsUsed])
         print 'Objective:\t\t %g' % self.evaluateObjective(self.PVBest)
         
-        print
-        
-        self.s.outputInfo()
+   
 
-    def short_output(self):
-	return self.simulatedR0, list(self.vacsUsed)[0], self.evaluateObjective(self.PVBest), list(self.PVBest), list(self.propVaccinatedtotal), list(self.Vaccinatedtotal)
+    def short_optimization_output(self):
+
+	return self.simulatedR0, list(self.vacsUsed)[0], self.evaluateObjective(self.PVBest), list(self.PVBest), list(self.Vaccinatedtotal), self.evaluateDetailedObjective(self.PVBest)
+
+
+    def low_vaccine_optimization(self):
+	return sum(list(self.infections)), sum(list(self.hospitalizations)), sum(list(self.deaths))
 	
 		
 

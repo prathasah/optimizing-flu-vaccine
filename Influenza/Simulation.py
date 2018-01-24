@@ -26,8 +26,6 @@ class run_Simulation:
 
         self.hasSolution = False
 
-    def vaccine_coverage(self):
-	return self.parameters.vaccineCoverage
 
     def computeR0(self):
         return self.parameters.computeR0()
@@ -215,12 +213,52 @@ class run_Simulation:
         self.deaths  = self.deathsU + self.deathsV
         self.totalDeaths = self.deaths.sum()
 	self.totalBurden = self.totalDeaths + self.totalInfections
-	self.YLL = numpy.dot(self.parameters.expectationOfLife,
+
+	self.YLL = numpy.multiply(self.parameters.expectationOfLife,
                              self.deaths)
 
 	#Years lived with disability
-	self.YLD = self.parameters.disabilityWeight * self.totalInfections * (1./self.parameters.recoveryRate)
-	self.DALY = (self.YLL + self.YLD).sum()
+	################################################################################
+	### Complications cases that are hospitalized
+	self._ARDS = numpy.multiply(self.infections, self.parameters.caseARDSfraction)
+	self.YLD_ARDS = self.parameters.disabilityWeightARDS * (numpy.multiply(self._ARDS, self.parameters.expectationOfLife))
+	
+	self._pneumonia = numpy.multiply(self.infections, self.parameters.casePneumoniafraction)
+	self.YLD_pneumonia = self.parameters.disabilityWeightPneumonia * (numpy.multiply(self._pneumonia, self.parameters.durationPneumonia))
+
+	self._HospitalizedComplicated_cases = self._ARDS + self._pneumonia
+	self.YLD_HospitalizedComplicated = self.YLD_ARDS + self.YLD_pneumonia
+	################################################################################
+	## Complications that are not hospitalized
+	
+	self._otitis = numpy.multiply(self.infections, self.parameters.caseOtitisfraction)
+	self.YLD_otitis = self.parameters.disabilityWeightOtitis * (numpy.multiply(self._otitis, self.parameters.durationOtitis))
+	
+	
+	self._deafness = numpy.multiply(self.infections, self.parameters.caseDeafnessfraction)
+	self.YLD_deafness = numpy.multiply(self.parameters.disabilityWeightDeafness, (numpy.multiply(self._deafness, self.parameters.expectationOfLife)))
+	
+	self._NonhospitalizedComplicated_cases =  self._otitis + self._deafness
+	self.YLD_NonhospitalizedComplicated = self.YLD_otitis + self.YLD_deafness
+	################################################################################
+	## Hospitalizations with no complications
+	
+	self._HospitalizedUncomplicated_cases = self.hospitalizations - self._HospitalizedComplicated_cases
+	self.YLD_HospitalizedUncomplicated =  self.parameters.disabilityWeightHospitalizedUncomplicated * numpy.multiply(self._HospitalizedUncomplicated_cases, (1./(self.parameters.recoveryRate*365)))
+	
+	################################################################################
+	## No hospitalizations with no complications 
+	self._NonhospitalizedUncomplicated_cases = self.infections - (self._HospitalizedUncomplicated_cases + self._HospitalizedComplicated_cases + self._NonhospitalizedComplicated_cases)	
+	self.YLD_NonhospitalizedUncomplicated = self.parameters.disabilityWeightUncomplicated * numpy.multiply(self._NonhospitalizedUncomplicated_cases, (1./(self.parameters.recoveryRate*365)))
+	
+	########################################################################
+	##total YLD
+	self.YLD = self.YLD_NonhospitalizedUncomplicated + self.YLD_HospitalizedUncomplicated + self.YLD_HospitalizedComplicated + self.YLD_NonhospitalizedComplicated
+	
+
+	self.DALY = (self.YLL + self.YLD)
+	self.totalDALY = self.DALY.sum()
+
         
         
     def simulate(self):
@@ -318,12 +356,12 @@ class run_Simulation:
 	return self.parameters.R0, self.parameters.proportionVaccinated, (self.parameters.proportionVaccinated * self.parameters.population)
 
     def short_output(self):
-	return list(self.infections), list(self.hospitalizations), list(self.deaths)
+	return list(self.infections), list(self.hospitalizations), list(self.deaths), list(self.DALY)
 
     def debug_info(self):
 	#print ("recovery rate ="), self.parameters.recoveryRate 
 	#print ("latency rate=="), self.parameters.latencyRate
-	return self.infectionsU.sum()
+	return list(self.DALY), list(self.YLL),  list(self.YLD)
 	
 
     def vaccinated_output(self):

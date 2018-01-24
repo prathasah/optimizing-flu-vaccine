@@ -75,9 +75,9 @@ class Parameters:
                                 PiecewiseAgeParameter): 
 		    self.setPWAttrFromPassedOrOther(m, p)
 
+	
 	self.vaccineEfficacyVsInfection = self.passedParamValues["vacEfficacy"] * self.relative_vaccineEfficacyVsInfection
 
-	self.vaccineCoverage = [(self.passedParamValues["vacCoverage"]*num/np.mean(self.relative_coverage)) for num in self.relative_coverage]
 
 
         # Compute mortality rates

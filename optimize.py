@@ -26,7 +26,6 @@ o = Optimization.Optimization()
 
 o.optimize()
 
-#print o.outputInfo()
-print o.short_output()
-
+print o.short_optimization_output()
+#print o.low_vaccine_optimization()
 
