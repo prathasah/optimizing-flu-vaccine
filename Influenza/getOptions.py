@@ -82,6 +82,7 @@ def getOptions(simType = 'Simulation'):
             'Usage: %prog [options] vacTime0 vacNumber0 [vacTime1 vacNumber1 ...]')
 	
         g = optparse.OptionGroup(p, "Optimizitation options")
+
 	
         g.add_option('-o', '--objective', action = 'callback',
                      dest = 'objective',
@@ -93,8 +94,9 @@ def getOptions(simType = 'Simulation'):
                      help =
                      'do not save data from the optimization')
         p.add_option_group(g)
-
+    
     (options, args) = p.parse_args()
+
     
    
 

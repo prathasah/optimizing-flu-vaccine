@@ -6,10 +6,7 @@ class Optimization:
     objectiveMap = {'Infections': 'totalInfections',
                     'Deaths': 'totalDeaths',
 		     'Burden': 'totalDALY',
-                    'Hospitalizations': 'totalHospitalizations',
-                    'YLL': 'YLL',
-                    'Contingent': 'CV',
-                    'Cost': 'totalCost'}
+                    'Hospitalizations': 'totalHospitalizations'}
     
     detailed_objectiveMap = {'Infections': 'infections',
                     'Deaths': 'deaths',
@@ -20,12 +17,14 @@ class Optimization:
                  *args, **kwargs):
         self.optimRuns = optimRuns
 
+
         if options != None:
             self.options = options
         else:
             from getOptions import getOptions
             self.options = getOptions('Optimization')
         
+
         self.vacTimes = numpy.array([v[0] for v in self.options.vacSchedule])
         self.vacNumbers = numpy.array([v[1] for v in self.options.vacSchedule])
 	self.vacEfficacy = numpy.array([v[2] for v in self.options.vacSchedule])
@@ -34,7 +33,7 @@ class Optimization:
 
         self.objective = self.options.objective 
 
-        from Simulation import run_Simulation
+        from Simulation_for_pairwise import run_Simulation
 
         self.s = run_Simulation(options = self.options, paramValues = {"vacEfficacy":self.vacEfficacy[0]}, *args, **kwargs)
 	

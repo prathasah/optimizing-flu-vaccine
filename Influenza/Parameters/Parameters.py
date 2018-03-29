@@ -5,6 +5,7 @@ import epidemiology
 import costs
 import os
 import numpy as np
+import types
 #from .. import fileIO
 
 
@@ -18,11 +19,16 @@ class ParamDict(UserDict.UserDict):
         Return value if key is in paramValues dict or return
         default as attribute from object other.
         '''
-	
-	reload(epidemiology)
-	reload(costs)
 	return getattr(other, key)
 
+
+    def epi_valueOrAttrFromOther(self, key, other, index):
+        '''
+        Return value if key is in paramValues dict or return
+        default as attribute from object other.
+        '''
+	return (getattr(other, key))(index)
+    
 class Parameters:
     def setPWAttr(self, namePW, value):
         '''
@@ -53,18 +59,52 @@ class Parameters:
         '''
 	setattr(self, name, 
                 self.passedParamValues.valueOrAttrFromOther(name, other))
+	
+	
+	
+    def epi_setPWAttr(self, namePW, value):
+        '''
+        Set a piecewise attribute as self.namePW
+        and its expanded value as self.name.
+        '''
+
+        assert isinstance(value, PiecewiseAgeParameter)
+        assert namePW.endswith('PW')
+        name = namePW[ : -2]
+        setattr(self, namePW, value)
+        setattr(self, name, value.full(self.ages))
+    
+    def epi_setPWAttrFromPassedOrOther(self, other, namePW, index):
+        '''
+        Set a piecewise attribute as self.namePW
+        and its expanded value as self.name,
+        taking values from passed paramValues
+        or from attributes of object other.
+        '''
+	self.epi_setPWAttr(namePW,self.passedParamValues.epi_valueOrAttrFromOther(namePW, other, index))
+	
+
+    def epi_setAttrFromPassedOrOther(self, other, name, index):
+        '''
+        Set an attribute as self.name,
+        taking value from passed paramValues
+        or from attributes of object other.
+        '''
+	setattr(self, name, 
+                self.passedParamValues.epi_valueOrAttrFromOther(name, other, index))
 
 ##################################################################
 
-    def __init__(self, **paramValues):
+    def __init__(self, index, **paramValues):
 
 	self.passedParamValues = ParamDict(paramValues)	
 
 	self.ages = numpy.array(ages)
 
+
         # Load in parameters and expand as necessary
-	# Go thrrough each files
-        for m in (demography, epidemiology, costs):
+	# Go through each files
+        for m in (demography, costs):
 	    # list all the modules
             for p in dir(m):
 		#if module returns a numbers, then..
@@ -74,6 +114,18 @@ class Parameters:
                 elif isinstance(getattr(m, p),
                                 PiecewiseAgeParameter): 
 		    self.setPWAttrFromPassedOrOther(m, p)
+		    
+		    
+        for p in dir(epidemiology):
+	    #if module returns a numbers, then..
+	    func = getattr(epidemiology, p)
+	    if isinstance(func,types.FunctionType):  
+		if isinstance(func(index),(float, int)):
+		    self.epi_setAttrFromPassedOrOther(epidemiology,p,index)
+		##if it is an agespecific parameter then..
+		elif isinstance(func(index),
+				    PiecewiseAgeParameter): 
+			self.epi_setPWAttrFromPassedOrOther(epidemiology,p, index)
 
 	
 	self.vaccineEfficacyVsInfection = self.passedParamValues["vacEfficacy"] * self.relative_vaccineEfficacyVsInfection
@@ -121,7 +173,6 @@ class Parameters:
         s0 = self.population / sum(self.population)
 	sU0 = s0 * (1 - self.proportionVaccinated)
 	sV0 = s0 * self.proportionVaccinated
-	
 
         FU = self.transmissionScaling \
               * numpy.outer(self.susceptibility * sU0,
@@ -130,6 +181,7 @@ class Parameters:
               * numpy.outer((1 - self.vaccineEfficacyVsInfection)
                             * self.susceptibility * sV0,
                             self.transmissibility) * self.contactMatrix
+	
         
         F = numpy.vstack((numpy.hstack((FU, FU)),
                           numpy.hstack((FV, FV))))
@@ -143,6 +195,7 @@ class Parameters:
         (Lambda, Nu) = numpy.linalg.eig(G)
 
         i = numpy.argmax(Lambda.real)
+
         LambdaMax = numpy.real_if_close(Lambda[i])
         
         assert numpy.isreal(LambdaMax), \

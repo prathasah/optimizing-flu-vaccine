@@ -18,8 +18,7 @@ class run_Simulation:
         # Must wait until after options, where RNG seed is set
        # Parameters = __import__('Parameters', globals())
 
-        self.parameters = Parameters.Parameters(index, **paramValues)
-
+        self.parameters = Parameters.Parameters(index,**paramValues)
 
         # Initial condition
         self.Y0 = numpy.zeros(8 * self.parameters.ages.size)
@@ -149,7 +148,7 @@ class run_Simulation:
             
             
         # Time vector for solution
-        self.T = numpy.hstack((numpy.arange(tStart, tEnd, tStep), tEnd))
+	self.T = numpy.hstack((numpy.arange(tStart, tEnd, tStep), tEnd))
         
         # Integrate the ODE
         from scipy.integrate import odeint
@@ -190,12 +189,10 @@ class run_Simulation:
         self.infectionsV = self.NV[0, :] - self.SV[-1, :]
 
         # Find duplicate times: these are where vaccination occurs
-
         for i in numpy.arange(len(self.T)).compress(numpy.diff(self.T) == 0):
             # Update for vaccinated people
             self.infectionsU += self.SU[i + 1, :] - self.SU[i, :]
             self.infectionsV += self.SV[i + 1, :] - self.SV[i, :]
-	    
 
         self.infections  = self.infectionsU + self.infectionsV
         self.totalInfections = self.infections.sum()
@@ -300,6 +297,8 @@ class run_Simulation:
 	    PVPWVals = numpy.asarray(PVPWVals).reshape(
                 (nVacRounds,
                  self.parameters.proportionVaccinatedLength))
+	    
+
 
         self.resetSolution()
 
@@ -323,19 +322,139 @@ class run_Simulation:
             else:
                 # End time
                 tEnd = self.tMax
-	    self.solve(tStart = vacTimes[vacRound], tEnd = tEnd)
+	    self.solve(tStart = 0, tEnd = tEnd)
 
-	#print self.IU.sum(axis=1), self.IU.sum(axis=1).shape
-	#import matplotlib.pyplot as plt
-	#times = [num for num in xrange(10001)]
-	#plt.plot(times, self.IU.sum(axis=1))
-	#plt.show()
-	#print ("check simul!!!"),  self.parameters.transmissionScaling, self.computeR0(), self.parameters.R0
         self.updateStats()
-	
 
         return vacsUsed
+    
+    
+    
+    def Optimization(self, objective, vacEfficacy, vacNumber):
+	
+    
+    
 
+        self.optimRuns = 1
+
+
+        from getOptions import getOptions
+        #self.options = getOptions('Optimization')
+
+
+	self.vacEfficacy = vacEfficacy
+	self.vacNumber = vacNumber
+        self.nVacRounds = 1
+	
+
+        self.objective = objective
+    
+	detailed_objectiveMap = {'totalInfections': 'infections',
+                    'totalDeaths': 'deaths',
+		     'totalDALY': 'DALY',
+                    'totalHospitalizations': 'hospitalizations'}
+	
+	self.detailed_objective = detailed_objectiveMap[objective]
+
+        #from Simulation_for_pairwise import run_Simulation
+	#self.s = run_Simulation(options = self.options, paramValues = {"vacEfficacy":self.vacEfficacy[0]}, *args, **kwargs)
+	
+        self.PVUsed = None
+
+	self.vacsUsed = numpy.array([0] * self.nVacRounds)
+	PVBest = self.optimize()
+	
+	return self.evaluateObjective(self.PVBest), self.simulatedR0, list(self.vacsUsed)[0],  list(self.PVBest), list(self.Vaccinatedtotal), self.evaluateDetailedObjective(self.PVBest)
+
+    
+    def optimize(self):
+        from scipy.optimize import fmin_cobyla
+	from scipy.optimize import minimize
+	
+
+	##returns [# vax remaining, current prop. vax. for age group 1, 2, 3,4,5, (1- cureent prop. vax. for age groups 1,2,3,4,5]
+        conds = [self.totalVacsCondition(i) for i in
+                 range(self.nVacRounds)]	
+	conds.extend([self.lowerCondition(i) for i in
+                      range(self.parameters.proportionVaccinatedLength
+                            * self.nVacRounds)])
+	
+        conds.extend([self.upperCondition(i) for i in
+                      range(self.parameters.proportionVaccinatedLength
+                            * self.nVacRounds)])
+	
+        minObjective = None
+
+        for i in range(self.optimRuns):
+           
+
+	    ## pick random vaccination levels between 0 and 0.5
+	    ## add 0.15 to avoid initial jumps to <0
+            PV0 = 0.1+(0.5 * numpy.random.rand(
+                self.parameters.proportionVaccinatedLength
+                * self.nVacRounds))
+	    
+	    
+
+            PVPWValsOpt = fmin_cobyla(self.evaluateObjective,
+                                      PV0,
+                                     conds,
+                                      maxfun = 10000,
+                                      rhobeg = 0.1,
+	   			      rhoend=0.000001,
+                                     disp = 0)
+
+	   
+	    
+	    if (minObjective == None) \
+                    or (self.evaluateObjective(PVPWValsOpt) < minObjective):
+               
+                
+                minObjective = self.evaluateObjective(PVPWValsOpt)
+                self.PVBest = PVPWValsOpt
+		self.simulatedR0, self.propVaccinatedtotal, self.Vaccinatedtotal = self.optimization_output()
+		self.infections, self.hospitalizations,self.deaths,self.DALY = self.short_output()
+		self.DALY, self.YLL, self.YLD = self.debug_info()
+        
+	self.optimize_solve(self.PVBest)
+	return self.PVBest
+	
+    
+    def evaluateObjective(self, PVPWVals):
+	""" main objective function to minimize. Returns infection simulation instance and the objective (totalinfections or ....)"""
+	self.optimize_solve(PVPWVals)
+	return getattr(self, self.objective)
+    
+    def evaluateDetailedObjective(self, PVPWVals):
+	""" main objective function to minimize. Returns infection simulation instance and the objective (totalinfections or ....)"""
+	self.optimize_solve(PVPWVals)
+	return getattr(self, self.detailed_objective)
+    
+    
+    def totalVacsConditions(self, PVPWVals):
+	self.optimize_solve(PVPWVals)
+	return (self.vacNumber - self.vacsUsed)
+
+    def totalVacsCondition(self, i):
+	return lambda PVPWVals: self.totalVacsConditions(PVPWVals)[i]
+
+    def lowerCondition(self, i):
+	#the min values should be greater than zero
+	return lambda PVPWVals: PVPWVals[i]
+
+    def upperCondition(self, i):
+	#1 - PVPWal should be greater than zero
+        return lambda PVPWVals: 1.0 - PVPWVals[i]
+    
+    def optimize_solve(self, PVPWVals):
+        # Only update for new PVPWVals
+        if numpy.any(PVPWVals != self.PVUsed):
+	    self.vacsUsed = self.simulateWithVaccine([0],
+                                                       PVPWVals, self.vacEfficacy)
+	    self.PVUsed = PVPWVals.copy()
+
+
+   
     def outputSolution(self):
         for (i, t) in enumerate(self.T):
             print '%g' % t,
@@ -366,6 +485,10 @@ class run_Simulation:
 
     def short_output(self):
 	return list(self.infections), list(self.hospitalizations), list(self.deaths), list(self.DALY)
+    
+    #def short_optimization_output(self):
+    #return self.simulatedR0, list(self.vacsUsed)[0], self.evaluateObjective(self.PVBest), list(self.PVBest), list(self.Vaccinatedtotal), self.evaluateDetailedObjective(self.PVBest)
+
 
     def debug_info(self):
 	#print ("recovery rate ="), self.parameters.recoveryRate 

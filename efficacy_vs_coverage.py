@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0, r'./Influenza')
 import numpy as np
-import Simulation 
+import Simulation
 
 # source :  https://www.cdc.gov/flu/fluvaxview/index.htm	
 #------------------------------------------------------------
@@ -19,17 +19,37 @@ relative_coverage = [ 0.7012,  0.7012,  0.5514,  0.5514 , 0.4614,  0.3264,  0.32
   0.3264,  0.4528,  0.4528,  0.4528,  0.4528,  0.6532,  0.6532,  0.6532]
 
 
-def run_efficacy_simulation(coverage, vacEfficacy):
+def run_efficacy_simulation(coverage, vacEfficacy, sub_iter):
 	reload(Simulation)
 	vaccineCoverage = [(coverage*num/np.mean(relative_coverage)) for num in relative_coverage]
-	s = Simulation.run_Simulation(paramValues = {"vacEfficacy":vacEfficacy})
+	s = Simulation.run_Simulation(paramValues = {"vacEfficacy":vacEfficacy}, index = sub_iter)
 	vacsUsed = s.simulateWithVaccine([0], vaccineCoverage, vacEfficacy)
 	infections, hospitalizations, mortality,DALY = s.short_output()
 	#check = s.debug_info()
-	totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated = s.vaccinated_output()
-	return totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated, infections, hospitalizations, mortality, DALY
+	#totpop, tot_unvaccinated, tot_vaccinated, unvaccinated, vaccinated = s.vaccinated_output()
+	return infections, hospitalizations, mortality, DALY
 	
 		
 		
-	
 
+######################################################################33
+if __name__ == "__main__":
+	
+	"""
+	no_vax_incidence = []
+	for sub_index in xrange(1000):
+		infections, hospitalizations, mortality, DALY = run_efficacy_simulation(0, 0.6,sub_index)
+		#print num
+		no_vax_incidence.append(sum(infections)/1e6)
+		
+	print ("no vaccination incidence"), np.mean(no_vax_incidence), np.std(no_vax_incidence)
+	"""
+	
+	vax_60_incidence = []
+	for sub_index in xrange(1):
+		#print sub_index
+		infections, hospitalizations, mortality, DALY = run_efficacy_simulation(0.43, 1,sub_index)
+		vax_60_incidence.append(sum(infections)/1e6)
+		
+	print ("typical vaccination incidence"), np.mean(vax_60_incidence), np.std(vax_60_incidence)
+	
