@@ -1,4 +1,5 @@
-data
-plot_codes
-plots
+data/
+plot_codes/
+plots/
+unused_files/
 *.pyc
