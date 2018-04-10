@@ -15,7 +15,7 @@ optimize uptake of low efficacy vaccine across age-groups. Please cite the follo
 form or create a derivative work
 > Pratha Sah, Jan Medlock, Meagan C. Fitzpatrick, Burton H. Singer, Alison P. Galvani.
 > Optimizing the impact of low-efficacy influenza vaccines.
->  *TO BE UPDATED*. 2018.
+> PNAS. 2018.
 
 
 Dependencies
